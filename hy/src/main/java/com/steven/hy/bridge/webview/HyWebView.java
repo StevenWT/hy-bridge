@@ -3,7 +3,6 @@ package com.steven.hy.bridge.webview;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Handler;
@@ -55,6 +54,7 @@ public class HyWebView extends LinearLayout implements HyView{
     protected TextView mTvRetryMessage;
     protected Button mBtRetry;
     protected Button mBtNext;
+    protected RelativeLayout mLoadingAndRetry;
 
     protected SslErrorHandler mSslErrorHandler;
     protected HyWebViewClient webViewClient;
@@ -93,6 +93,7 @@ public class HyWebView extends LinearLayout implements HyView{
         mBtNext = (Button) mRoot.findViewById(R.id.hy_view_retry_bt_next);
         mWebView = (WebView) mRoot.findViewById(R.id.hy_view_web_view);
         mTvRetryMessage = (TextView) mRoot.findViewById(R.id.hy_view_retry_tip_tv);
+        mLoadingAndRetry=(RelativeLayout) mRoot.findViewById(R.id.hy_view_retry_content);
         addView(mRoot, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         initWebView();
         initListener();
@@ -380,7 +381,17 @@ public class HyWebView extends LinearLayout implements HyView{
         webViewClient.callJsPlugin(jsPluginName);
     }
 
-
+    /**
+     * 是否存在loading和retry功能
+     * @param visible
+     */
+    public void setLoadingAndRetryVisible(boolean visible){
+        if(visible){
+            mLoadingAndRetry.setVisibility(VISIBLE);
+        }else {
+            mLoadingAndRetry.setVisibility(GONE);
+        }
+    }
     /**
      * 销毁webView和回调消息
      */
