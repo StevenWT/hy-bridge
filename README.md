@@ -1,7 +1,7 @@
 # hy-bridge
 Bridge for sending messages between Android Java and JavaScript in WebViews
 ### 前言
-项目着急上线，需要一个简单的hybrid。参考已经存在的开源项目，修复了一些桥的通信Bug,并进行了插件，loading等使用友好性封装。注释比较详细。
+项目着急上线，需要一个简单的hybrid。参考已经存在的开源项目，修复了一些桥的通信Bug,并进行了插件，loading等使用友好性封装。代码比较简单，注释相对详细。几天完成的模块，想要简单的hybrid项目可以参考,感谢老大的帮助。
 
 ### 注入
 页面通过固定的URL，可以实现注入Bridge JS，默认为 `iframe src="https://__get__bridge__/mobile/bridge.html`，
