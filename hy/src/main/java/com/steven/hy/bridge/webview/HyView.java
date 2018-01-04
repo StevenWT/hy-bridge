@@ -35,7 +35,7 @@ public interface HyView extends HyBridge {
     JSONObject getWebInitData();
 
     /**
-     * 设置web初始化数据
+     * 设置web初始化数据，Web可通过插件GetDataPlugin获取
      * @param object
      */
     void setWebInitData(JSONObject object);
