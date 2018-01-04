@@ -1,0 +1,142 @@
+(function() {
+	if (window.NJWebViewJavascriptBridge) { return }
+	var messagingIframe
+	var sendMessageQueue = []
+	var receiveMessageQueue = []
+	var messageHandlers = {}
+	
+	var CUSTOM_PROTOCOL_SCHEME = 'wvjbscheme'
+	var QUEUE_HAS_MESSAGE = '__WVJB_QUEUE_MESSAGE__'
+	var QUEUE_FLUSH_MESSAGE = '__WVJB_FLUSH_MESSAGE__'
+
+	var responseCallbacks = {}
+	var uniqueId = 1
+
+	var doc = document;
+	
+	function _createQueueReadyIframe(doc) {
+		messagingIframe = doc.createElement('iframe')
+		messagingIframe.style.display = 'none'
+		doc.documentElement.appendChild(messagingIframe)
+	}
+
+	function _createMessageIframe(doc) {
+    	var ifr = doc.createElement('iframe')
+    	ifr.style.display = 'none'
+    	doc.documentElement.appendChild(ifr);
+    	return ifr;
+    }
+
+	function init(messageHandler) {
+		if (NJWebViewJavascriptBridge._messageHandler) { throw new Error('NJWebViewJavascriptBridge.init called twice') }
+		NJWebViewJavascriptBridge._messageHandler = messageHandler
+		var receivedMessages = receiveMessageQueue
+		receiveMessageQueue = null
+		for (var i=0; i<receivedMessages.length; i++) {
+			_dispatchMessageFromObjC(receivedMessages[i])
+		}
+	}
+
+	function send(data, responseCallback) {
+		_doSend({ data:data }, responseCallback)
+	}
+	
+	function registerHandler(handlerName, handler) {
+		messageHandlers[handlerName] = handler
+	}
+	
+	function callHandler(handlerName, data, responseCallback) {
+		_doSend({ handlerName:handlerName, data:data }, responseCallback)
+	}
+
+	function _packMessage(message, responseCallback){
+	    if (responseCallback) {
+            var callbackId = 'cb_'+(uniqueId++)+'_'+new Date().getTime()
+            responseCallbacks[callbackId] = responseCallback
+            message['callbackId'] = callbackId
+        }
+
+        return message;
+	}
+	
+	function _doSend(message, responseCallback) {
+		_packMessage(message,responseCallback)
+		sendMessageQueue.push(message)
+		_fetchQueue()
+	}
+
+	function _fetchQueue() {
+        var ifr = _createMessageIframe(doc);
+        var message = _packMessage({ handlerName:"Nop", data:new Date().getTime()+"_"+uniqueId },function(){
+            ifr.parentNode.removeChild(ifr);
+        });
+		sendMessageQueue.push(message);
+		var messageQueueString = JSON.stringify(sendMessageQueue)
+		var url = CUSTOM_PROTOCOL_SCHEME + '://' + QUEUE_FLUSH_MESSAGE + '/' + encodeURIComponent(messageQueueString);
+		sendMessageQueue = []
+		ifr.src = url;
+		//messagingIframe.src = url
+	}
+
+	function _dispatchMessageFromObjC(messageJSON) {
+		setTimeout(function _timeoutDispatchMessageFromObjC() {
+			var message = JSON.parse(messageJSON)
+			var messageHandler
+			
+			if (message.responseId) {
+				var responseCallback = responseCallbacks[message.responseId]
+				if (!responseCallback) { return; }
+				responseCallback(message.responseData)
+				delete responseCallbacks[message.responseId]
+			} else {
+				var responseCallback
+				if (message.callbackId) {
+					var callbackResponseId = message.callbackId
+					responseCallback = function(responseData) {
+						_doSend({ responseId:callbackResponseId, responseData:responseData })
+					}
+				}
+				
+				var handler = NJWebViewJavascriptBridge._messageHandler
+				if (message.handlerName) {
+					handler = messageHandlers[message.handlerName]
+				}
+				
+				try {
+					handler(message.data, responseCallback)
+				} catch(exception) {
+					if (typeof console != 'undefined') {
+						console.log("NJWebViewJavascriptBridge: WARNING: javascript handler threw.", message, exception)
+					}
+				}
+			}
+		})
+	}
+	
+	function _handleMessageFromObjC(messageJSON) {
+		if (receiveMessageQueue) {
+			receiveMessageQueue.push(messageJSON)
+		} else {
+			_dispatchMessageFromObjC(messageJSON)
+		}
+	}
+
+	window.NJWebViewJavascriptBridge = {
+		init: init,
+		send: send,
+		registerHandler: registerHandler,
+		callHandler: callHandler,
+		_fetchQueue: _fetchQueue,
+		_handleMessageFromObjC: _handleMessageFromObjC
+	}
+
+	_createQueueReadyIframe(doc)
+	var readyEvent = doc.createEvent('Events')
+	readyEvent.initEvent('NJWebViewJavascriptBridgeReady')
+	readyEvent.bridge = NJWebViewJavascriptBridge
+	init(function(message, responseCallback) {
+    			var data = { 'response':'default' }
+    			responseCallback(data)
+    		})
+	doc.dispatchEvent(readyEvent)
+})();

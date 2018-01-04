@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <WebView
+        android:id="@+id/hy_view_web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </WebView>
+
+    <RelativeLayout
+        android:id="@+id/hy_view_loading_rl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/hy_view_loading_stock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="200dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/hy_view_retry_rl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/hy_view_retry_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"
+            android:src="@drawable/retry_icon_info" />
+
+        <TextView
+            android:id="@+id/hy_view_retry_tip_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/hy_view_retry_iv"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="30dp"
+            android:text="@string/hy_load_fail"
+            android:textSize="15dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/hy_view_retry_tip_tv"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="130dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/hy_view_retry_bt_retry"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/pub_retry_btn_selector"
+                android:text="@string/hy_retry_info"
+                android:textColor="@drawable/pub_retry_btn_text_color_selector"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/hy_view_retry_bt_next"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/pub_retry_btn_selector"
+                android:text="@string/hy_ssl_error_next"
+                android:textColor="@drawable/pub_retry_btn_text_color_selector"
+                android:textSize="14sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

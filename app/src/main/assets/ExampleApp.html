@@ -1,0 +1,74 @@
+<!doctype html>
+<html><head>
+	<style type='text/css'>
+		html { font-family:Helvetica; color:#222; }
+		h1 { color:steelblue; font-size:24px; margin-top:24px; }
+		button { margin:0 3px 10px; font-size:12px; }
+		.logLine { border-bottom:1px solid #ccc; padding:4px 2px; font-family:courier; font-size:11px; }
+	</style>
+</head><body>
+	<h1>Hy-Bridge Demo</h1>
+	<iframe src="https://__get__bridge__/mobile/bridge.html" style="display:none"></iframe>
+	<script>
+	window.onerror = function(err) {
+		log('window.onerror: ' + err)
+	}
+	
+	function connectWebViewJavascriptBridge(callback) {
+		if (window.NJWebViewJavascriptBridge) {
+			callback(NJWebViewJavascriptBridge)
+		} else {
+			document.addEventListener('NJWebViewJavascriptBridgeReady', function() {
+				callback(NJWebViewJavascriptBridge)
+			}, false)
+		}
+	}
+
+	connectWebViewJavascriptBridge(function(bridge) {
+		var uniqueId = 1
+		function log(message, data) {
+			var log = document.getElementById('log')
+			var el = document.createElement('div')
+			el.className = 'logLine'
+			el.innerHTML = uniqueId++ + '. ' + message + (data ? ':<br/>' + JSON.stringify(data) : '')
+			if (log.children.length) { log.insertBefore(el, log.children[0]) }
+			else { log.appendChild(el) }
+		}
+
+		bridge.callHandler('PageLoader', {'status': 2 }, function(response) {
+				log('JS call PageLoader got response', response)
+			})
+
+
+		bridge.registerHandler('testJavascriptPlugin', function(data, responseCallback) {
+			log('Java called testJavascriptPlugin with', data)
+			var responseData = { 'Outcome':'Success','Data':{'Result':'Hi,Java!'}}
+			log('JS responding with', responseData)
+			responseCallback(responseData)
+		})
+
+		var button = document.getElementById('buttons').appendChild(document.createElement('button'))
+		button.innerHTML = 'Call plugin Toast'
+		button.onclick = function(e) {
+			e.preventDefault()
+			log('JS calling handler "Toast"')
+			bridge.callHandler('Toast', {'message': 'Hi,hy','type':1}, function(response) {
+				log('JS call Toast got response', response)
+			})
+		}
+
+		document.body.appendChild(document.createElement('br'))
+
+		var callbackButton = document.getElementById('buttons').appendChild(document.createElement('button'))
+		callbackButton.innerHTML = 'Call plugin Next'
+		callbackButton.onclick = function(e) {
+			e.preventDefault()
+			log('JS calling plugin "Next"')
+			bridge.callHandler('Next', {'title': '第二个页面'}, function(response) {
+				log('JS call Next got response', response)
+			})
+		}
+	})
+	</script>
+	<div id='buttons'></div> <div id='log'></div>
+</body></html>
