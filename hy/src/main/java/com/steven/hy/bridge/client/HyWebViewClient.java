@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
@@ -439,6 +440,17 @@ public class HyWebViewClient extends WebViewClient {
         }
         return super.shouldInterceptRequest(view, request);
     }
+
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        if(!TextUtils.isEmpty(url)&&url.equals(kCustomInjectJsScheme)){
+            //页面里面的iframe只是页面的一部分,没有触发shouldOverrideUrlLoading 触发了shouldInterceptRequest
+            //页面通过固定iframe的URL，可以实现注入Bridge JS，默认为 https://__get__bridge__
+            injectJs();
+        }
+        return super.shouldInterceptRequest(view, url);
+    }
+
 
     /**
      * java<-->js之间发送的消息
