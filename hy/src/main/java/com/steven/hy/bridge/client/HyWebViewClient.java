@@ -404,11 +404,6 @@ public class HyWebViewClient extends WebViewClient {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             String url = request.getUrl().toString();
-            try {
-                url = URLDecoder.decode(url, "UTF-8");
-            } catch (UnsupportedEncodingException ex) {
-                ex.printStackTrace();
-            }
             if (url.startsWith(kCustomProtocolScheme)) {
                 if (url.indexOf(kQueueFlushMessage) > 0) {
                     try {
